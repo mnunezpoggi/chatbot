@@ -155,6 +155,10 @@ public class Chatbot implements MessageListener, CommandListener, RegistrationLi
             c.addOption(longOpt, longOpt, hasArg, description);
         }
     }
+    
+    public HashMap<String, Command> getCommands(){
+        return this.commands;
+    }
 
     public static void main(String[] args) {
         Chatbot bot = new Chatbot();
