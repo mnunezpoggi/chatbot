@@ -86,6 +86,7 @@ public class IrcMessageBridge extends MessageBridge {
                 .setAutoNickChange(true) //Automatically change nick when the current one is in use
                 .addAutoJoinChannel(this.config.get("IRC_CHANNEL")) //Join #pircbotx channel on connect
                 .setListenerManager(myListenerManager)
+                .setAutoReconnect(true)
                 .addServer(this.config.get("IRC_HOST"))
                 //.addListener(adapter)
                 .buildConfiguration(); //Create an immutable configuration from this builder
