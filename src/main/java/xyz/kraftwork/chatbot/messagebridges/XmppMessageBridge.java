@@ -33,6 +33,7 @@ import static xyz.kraftwork.chatbot.messagebridges.MessageBridge.Bridge.*;
 public class XmppMessageBridge extends MessageBridge implements IncomingChatMessageListener {
 
     private static final String[] REQUIRED_CONFIGS = new String[]{"XMPP_USER", "XMPP_PASSWORD", "XMPP_HOST", "XMPP_DOMAIN"};
+    private static final String ADMIN_CONFIG = "XMPP_ADMINS";
 
     private ChatManager manager;
     private XMPPTCPConnection connection;
@@ -78,13 +79,18 @@ public class XmppMessageBridge extends MessageBridge implements IncomingChatMess
     public void newIncomingMessage(EntityBareJid from, Message message, Chat chat) {
         System.out.println(message);
         System.out.println(message.getBody());
-        ChatInfo info = new ChatInfo(XMPP, message.getBody(), from.asEntityBareJidString());
+        ChatInfo info = new ChatInfo(XMPP, message.getBody(), from.asEntityBareJidString(), from.asEntityBareJidString());
         this.bot.onMessage(info);
     }
 
     @Override
     public String[] requiredConfigs() {
         return REQUIRED_CONFIGS;
+    }
+    
+    @Override
+    public String adminConfig(){
+        return ADMIN_CONFIG;
     }
 
     @Override
@@ -118,6 +124,11 @@ public class XmppMessageBridge extends MessageBridge implements IncomingChatMess
     @Override
     public Bridge bridgeType() {
         return Bridge.XMPP;
+    }
+
+    @Override
+    public boolean checkMessage(Object message) {
+        return true;
     }
 
 }

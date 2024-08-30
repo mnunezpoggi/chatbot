@@ -24,6 +24,7 @@ import static xyz.kraftwork.chatbot.messagebridges.MessageBridge.Bridge.IRC;
 public class IrcMessageBridge extends MessageBridge {
 
     private static final String[] REQUIRED_CONFIGS = new String[]{"IRC_HOST", "IRC_NAME", "IRC_CHANNEL"};
+    private static final String ADMIN_CONFIG = "IRC_ADMINS";
 
     private PircBotX ircbot;
 
@@ -36,7 +37,7 @@ public class IrcMessageBridge extends MessageBridge {
         this.ircbot.sendIRC().message(info.getFrom(), info.getMessage());
         return null;
     }
-    
+
     @Override
     public Object sendMessageAll(ChatInfo chatInfo) {
         chatInfo.setFrom(config.get("IRC_CHANNEL"));
@@ -47,7 +48,12 @@ public class IrcMessageBridge extends MessageBridge {
     public String[] requiredConfigs() {
         return REQUIRED_CONFIGS;
     }
-    
+
+    @Override
+    public String adminConfig() {
+        return ADMIN_CONFIG;
+    }
+
     @Override
     public Bridge bridgeType() {
         return Bridge.IRC;
@@ -56,24 +62,27 @@ public class IrcMessageBridge extends MessageBridge {
     @Override
     public boolean initBridge() {
         ListenerAdapter adapter = new ListenerAdapter() {
-            
-            private void setChatInfo(String from, String message){
-                 ChatInfo info = new ChatInfo(IRC, message, from);
-                 bot.onMessage(info);
+
+            private void setChatInfo(String from, String user, String message) {
+                ChatInfo info = new ChatInfo(IRC, message, from, user);
+                if (checkMessage(info)) {
+                    bot.onMessage(info);
+                }
             }
-            
+
             @Override
             public void onMessage(MessageEvent event) {
-                setChatInfo(event.getChannelSource(), event.getMessage());
+                String nick = event.getUser().getNick();
+                setChatInfo(event.getChannelSource(), nick, event.getMessage());
             }
-            
+
             @Override
-            public void onPrivateMessage(PrivateMessageEvent event){
-                setChatInfo(event.getUser().getNick(), event.getMessage());
+            public void onPrivateMessage(PrivateMessageEvent event) {
+                setChatInfo(event.getUser().getNick(), event.getUser().getNick(), event.getMessage());
             }
-            
+
             @Override
-            public void onMotd(MotdEvent event){
+            public void onMotd(MotdEvent event) {
                 System.out.println("++++++++++++++++++++ ONMOTD");
                 afterRegistration();
             }
@@ -106,8 +115,10 @@ public class IrcMessageBridge extends MessageBridge {
         };
         t.start();
         try {
-            Thread.sleep(1000);} catch (InterruptedException ex) {}
-        if(ircbot == null){
+            Thread.sleep(1000);
+        } catch (InterruptedException ex) {
+        }
+        if (ircbot == null) {
             System.out.println("COULDN'T connect");
             return false;
         }
@@ -120,6 +131,13 @@ public class IrcMessageBridge extends MessageBridge {
         return this.bot.onRegistration();
     }
 
-
+    @Override
+    public boolean checkMessage(Object message) {
+        if (!hasAdmins) {
+            return true;
+        }
+        String nick = ((ChatInfo) message).getUser();
+        return this.admins.contains(nick);
+    }
 
 }

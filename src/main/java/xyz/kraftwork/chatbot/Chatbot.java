@@ -39,7 +39,7 @@ public class Chatbot implements MessageListener, CommandListener, RegistrationLi
         setBridges();
         setDefaultCommands();
     }
-
+    
     public void sendMessageAll(String text) {
         ChatInfo chatInfo = new ChatInfo();
         chatInfo.setMessage(text);
@@ -68,7 +68,7 @@ public class Chatbot implements MessageListener, CommandListener, RegistrationLi
     
     @Override
     public Object onMessage(ChatInfo info) {
-        String text = info.getMessage().trim();
+        String text = info.getMessage().trim();        
         for (MessageListener l : MessageListeners) {
             l.onMessage(info);
         }
@@ -190,7 +190,7 @@ public class Chatbot implements MessageListener, CommandListener, RegistrationLi
                 System.out.println("Couldnt set");
             }
         } catch (Exception ex) {
-            Logger.getLogger(Chatbot.class.getName()).log(Level.SEVERE, null, ex);
+           ex.printStackTrace();
         }
 
     }
